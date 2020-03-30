@@ -1,20 +1,26 @@
-import React, { useState } from 'react';
-import { useDataApi } from './Service';
+import React, { useState, useEffect } from 'react';
+import { chamaApi } from './Service';
 
-function App() {
+export default function App() {
   const [query, setQuery] = useState('redux');
-  const [{ data }, doFetch] = useDataApi('https://hn.algolia.com/api/v1/search?query=redux', { hits: [] });
+  const [results, setResults] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      setResults(await chamaApi('redux'));
+    }
+    fetchData();
+  }, []);
+
+  async function search(event) {
+    event.persist()
+    event.preventDefault();
+    setResults(await chamaApi(query)); 
+  }
 
   return (
     <>
-      <form
-        onSubmit={event => {
-          doFetch(
-            `http://hn.algolia.com/api/v1/search?query=${query}`,
-          );
-          event.preventDefault();
-        }}
-      >
+      <form onSubmit={async event => {setResults([]); search(event)}}>
         <input
           type="text"
           value={query}
@@ -24,14 +30,15 @@ function App() {
       </form>
       
       <ul>
-        {data.hits.map(item => (
-          <li key={item.objectID}>
-            <a href={item.url}>{item.title}</a>
-          </li>
-        ))}
+        {results.length > 1 ? 
+          results.map(item => (
+            <li key={item.objectID}>
+              <a href={item.url}>{item.title}</a>
+            </li>  
+          ))
+        : 'Loading...'
+        }
       </ul>
     </>
   );
 }
-
-export default App;

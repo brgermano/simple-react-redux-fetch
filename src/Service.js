@@ -1,24 +1,8 @@
-import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export const useDataApi = (initialUrl, initialData) => {
-  const [data, setData] = useState(initialData);
-  const [url, setUrl] = useState(initialUrl);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await axios(url, {
-          headers: {
-            Accept: 'PLAU'
-          }
-        });
-        setData(result.data);
-      } catch (error) {
-        console.log('error', error)
-      }
-    };
-    fetchData();
-  }, [url]);
-  return [{ data }, setUrl];
+export function chamaApi(queryParameter) {
+  return axios
+  .get(`https://hn.algolia.com/api/v1/search?query=${queryParameter}`)
+  .then(response => response.data.hits)
+  .catch(error => console.log('error', error))
 };
